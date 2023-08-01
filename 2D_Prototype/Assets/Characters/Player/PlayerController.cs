@@ -5,10 +5,20 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    // Movement
     public float movementSpeed = 1f;
     public float collisionOffset = 0.05f;
     public ContactFilter2D movementFilter;
 
+    // Animation
+    private bool canMove = true;
+   
+    // Attack
+    public Transform attackPoint;
+    public float radius;
+    public LayerMask enemyLayers;
+
+    // Player components
     Vector2 movementInput;
     Rigidbody2D rb;
     SpriteRenderer spriteRenderer;
@@ -52,14 +62,17 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("isMovingDown", false);
         }
 
-        // Set direction of sprite to movement direction
-        if (movementInput.x < 0)
+        if (canMove) 
         {
-            spriteRenderer.flipX = true;
-        }
-        else if (movementInput.x > 0)
-        {
-            spriteRenderer.flipX = false;
+            // Set direction of sprite to movement direction
+            if (movementInput.x < 0)
+            {
+                spriteRenderer.flipX = true;
+            }
+            else if (movementInput.x > 0)
+            {
+                spriteRenderer.flipX = false;
+            }
         }
     }
 
@@ -77,6 +90,67 @@ public class PlayerController : MonoBehaviour
 
     void OnMove(InputValue movementValue)
     {
-        movementInput = movementValue.Get<Vector2>();
+       movementInput = movementValue.Get<Vector2>();
     }
+
+    void Update()
+    {
+        // Track current animation to locate the position of the hitbox 
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_attack_down") || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_idle") 
+            || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_walk_down"))
+        {
+            attackPoint.position = new Vector3(rb.transform.position.x, rb.transform.position.y - 1.1f, rb.transform.position.z);
+        }
+        else if ((animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_attack_right") || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_walk")) && !spriteRenderer.flipX)
+        {
+            attackPoint.position = new Vector3(rb.transform.position.x + 0.85f, rb.transform.position.y, rb.transform.position.z);
+        }
+        else if ((animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_attack_right") || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_walk")) && spriteRenderer.flipX)
+        {
+            attackPoint.position = new Vector3(rb.transform.position.x - 0.85f, rb.transform.position.y, rb.transform.position.z);
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_attack_up") || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_walk_up")) 
+        {
+            attackPoint.position = new Vector3(rb.transform.position.x, rb.transform.position.y + 0.85f, rb.transform.position.z);
+        }
+
+        // Forbid change of the attack direction
+        if (canMove)
+        {
+            // Attack when player presses space bar
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                // Stop character from moving while animation is played
+                rb.bodyType = RigidbodyType2D.Static;
+                canMove = false;
+
+                // Start attack animation 
+                StartCoroutine(Attack());
+            }
+        }
+    }
+
+    IEnumerator Attack()
+    {
+        // Play animation
+        animator.SetTrigger("Attack");
+
+        //Detect all enemies hit
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, radius);
+
+        // Destroy/Deal damage to every enemy hit
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            Debug.Log("Enemy hit :" + enemy.name);
+            enemy.GetComponent<DestroyObject>().DestroySelf();
+        }
+
+        // Wait until animation is finished
+        yield return new WaitForSeconds(0.55f);
+
+        // Lets character move
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        canMove = true;
+    }
+
 }
