@@ -73,7 +73,8 @@ SpriteRenderer:
   m_SortingLayerID: -105541197
   m_SortingLayer: 3
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 7482667652216324306, guid: ef5a125072a60594fb57007dba24290b,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -81,7 +82,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &7587657247391410645
@@ -307,9 +308,7 @@ MonoBehaviour:
     maxNormalAngle: 0
   attackPoint: {fileID: 4416289772278274577}
   radius: 0.35
-  enemyLayers:
-    serializedVersion: 2
-    m_Bits: 0
+  damage: 50
 --- !u!95 &1688141357580680936
 Animator:
   serializedVersion: 5

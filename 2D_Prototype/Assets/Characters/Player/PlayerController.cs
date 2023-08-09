@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
     // Attack
     public Transform attackPoint;
     public float radius;
-    public LayerMask enemyLayers;
+    public float damage = 50f;
 
     // Player components
     Vector2 movementInput;
@@ -99,7 +99,7 @@ public class PlayerController : MonoBehaviour
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_attack_down") || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_idle") 
             || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_walk_down"))
         {
-            attackPoint.position = new Vector3(rb.transform.position.x, rb.transform.position.y - 1.1f, rb.transform.position.z);
+            attackPoint.position = new Vector3(rb.transform.position.x, rb.transform.position.y - 1f, rb.transform.position.z);
         }
         else if ((animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_attack_right") || animator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.player_walk")) && !spriteRenderer.flipX)
         {
@@ -142,7 +142,7 @@ public class PlayerController : MonoBehaviour
         foreach (Collider2D enemy in hitEnemies)
         {
             Debug.Log("Enemy hit :" + enemy.name);
-            enemy.GetComponent<DestroyObject>().DestroySelf();
+            enemy.GetComponent<EnemyController>().GetHit(damage);
         }
 
         // Wait until animation is finished
@@ -153,4 +153,8 @@ public class PlayerController : MonoBehaviour
         canMove = true;
     }
 
+    public void GetHit(float damage)
+    {
+        Debug.Log($"I have been hit for {damage} damage!");
+    }
 }
